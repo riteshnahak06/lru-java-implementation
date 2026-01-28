@@ -3,8 +3,8 @@ package com.design.service;
 public class CacheNode {
     String key;
     Customer value;
-    Customer previous;
-    Customer next;
+    CacheNode previous;
+    CacheNode next;
 
     public CacheNode(String key, Customer value) {
         this.key = key;
