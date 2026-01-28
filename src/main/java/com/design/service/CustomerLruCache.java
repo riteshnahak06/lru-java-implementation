@@ -15,6 +15,23 @@ public class CustomerLruCache {
         this.maxCapacity = maxCapacity;
     }
 
+    public synchronized void putCustomer(String customerId,Customer customer){
+        CacheNode node=map.get(customerId);
+        // if customer exist
+        if (node!=null){
+            node.value=customer;
+            moveToHead(node); // move as recently updated
+            return;
+        }
+        CacheNode newNode=new CacheNode(customerId,customer);
+        map.put(customerId,newNode);
+        addToHead(newNode); // coz recently used
+
+        if (map.size()>maxCapacity){
+            evictLeastRecentUsed();
+        }
+    }
+
     public Customer getCustomer(String customerId){
         CacheNode cacheNode=map.get(customerId);
         if (cacheNode==null) {
@@ -28,7 +45,6 @@ public class CustomerLruCache {
 
     private synchronized void moveToHead(CacheNode cacheNode) {
         // remove the node from existing place
-
         removeNode(cacheNode);
         
         // add to head
@@ -60,6 +76,12 @@ public class CustomerLruCache {
         }else {
             // node is tail
             tail = cacheNode.previous;
+        }
+    }
+    private synchronized void evictLeastRecentUsed(){
+        if (tail!=null){
+            map.remove(tail.value);// remove from data
+            removeNode(tail); // remove from doubly ll chain
         }
     }
 
