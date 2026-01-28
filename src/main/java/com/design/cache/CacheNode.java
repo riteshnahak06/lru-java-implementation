@@ -1,4 +1,4 @@
-package com.design.service;
+package com.design.cache;
 
 public class CacheNode {
     String key;
