@@ -47,6 +47,7 @@ public class CustomerLruCache {
     }
 
     private synchronized void moveToHead(CacheNode cacheNode) {
+        // handle if cache node is head
         if (cacheNode == head) {
             return;
         }
@@ -63,9 +64,7 @@ public class CustomerLruCache {
         if (head != null) {
             head.previous = cacheNode;
         }
-
         head = cacheNode;
-
         if (tail == null) {
             tail = cacheNode;
         }
