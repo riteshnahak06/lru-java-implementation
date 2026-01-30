@@ -66,7 +66,7 @@ All tests are written using **JUnit 5** and **Mockito**.
 
 ## 🧠 Why This Project Matters
 
-This project demonstrates:
+This project demonstrates :
 - Understanding of **cache eviction policies**
 - Strong grasp of **data structures (HashMap + Doubly Linked List)**
 - Ability to reason about **time and space complexity**
