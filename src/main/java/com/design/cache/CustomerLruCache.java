@@ -10,28 +10,32 @@ public class CustomerLruCache {
     private final Map<String, CacheNode> map = new ConcurrentHashMap<>();
     private CacheNode head;
     private CacheNode tail;
+    private final Object lruLock=new Object();
 
     // enable eviction when limit exceed
     public CustomerLruCache(int maxCapacity) {
         this.maxCapacity = maxCapacity;
     }
 
-    public synchronized void putCustomer(String customerId, Customer customer) {
+    public  void putCustomer(String customerId, Customer customer) {
         CacheNode node = map.get(customerId);
 
         // if customer exist
         if (node != null) {
             node.value = customer;
-            moveToHead(node); // move as recently updated
+            synchronized (lruLock){
+                moveToHead(node); // move as recently updated
+            }
             return;
         }
 
         CacheNode newNode = new CacheNode(customerId, customer);
         map.put(customerId, newNode);
-        addToHead(newNode); // coz recently used
-
-        if (map.size() > maxCapacity) {
-            evictLeastRecentUsed();
+        synchronized (lruLock){
+            addToHead(newNode); // coz recently used
+            if (map.size() > maxCapacity) {
+                evictLeastRecentUsed();
+            }
         }
     }
 
@@ -40,13 +44,15 @@ public class CustomerLruCache {
         if (cacheNode == null) {
             return null;
         }
-        // move it head as it was recently used
-        moveToHead(cacheNode);
+        synchronized (lruLock){
+            // move it head as it was recently used
+            moveToHead(cacheNode);
+        }
         // get customer data
         return cacheNode.value;
     }
 
-    private synchronized void moveToHead(CacheNode cacheNode) {
+    private  void moveToHead(CacheNode cacheNode) {
         // handle if cache node is head
         if (cacheNode == head) {
             return;
@@ -57,7 +63,7 @@ public class CustomerLruCache {
         addToHead(cacheNode);
     }
 
-    private synchronized void addToHead(CacheNode cacheNode) {
+    private  void addToHead(CacheNode cacheNode) {
         cacheNode.previous = null; // as we want it as head
         cacheNode.next = head;
 
@@ -70,7 +76,7 @@ public class CustomerLruCache {
         }
     }
 
-    private synchronized void removeNode(CacheNode cacheNode) {
+    private  void removeNode(CacheNode cacheNode) {
 
         // if node is not head
         if (cacheNode.previous != null) {
@@ -92,7 +98,7 @@ public class CustomerLruCache {
         cacheNode.next = null;
     }
 
-    private synchronized void evictLeastRecentUsed() {
+    private  void evictLeastRecentUsed() {
         if (tail != null) {
             map.remove(tail.key); // remove from data
             removeNode(tail);     // remove from doubly ll chain
